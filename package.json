@@ -1,0 +1,14 @@
+{
+  "name": "aula-4-cypress-cadastro-login",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aula prática de Cypress com cenários de cadastro e login no Seu Barriga",
+  "scripts": {
+    "cy:open": "cypress open --e2e",
+    "cy:run": "cypress run --e2e",
+    "test": "npm run cy:run"
+  },
+  "devDependencies": {
+    "cypress": "15.20.1"
+  }
+}

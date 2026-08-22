@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qualidade de Software — Aula 4</title>
+  <link rel="stylesheet" href="apresentacao.css">
+</head>
+<body>
+  <main id="deck">
+    <section class="slide active">
+      <span class="tag">Aula 4 • Qualidade de Software</span>
+      <h1>Cypress<br>na prática</h1>
+      <p class="lead">Cadastro, login e cenários que realmente provam o comportamento.</p>
+      <div class="pills"><span>1 cenário feliz</span><span>2 falhas</span><span>por funcionalidade</span></div>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Conexão com a Aula 3</span>
+      <h2>Já sabemos comandar. Agora vamos pensar em cenários.</h2>
+      <div class="grid three">
+        <article><h3>Localizar</h3><p><code>cy.get()</code> e <code>cy.contains()</code></p></article>
+        <article><h3>Interagir</h3><p><code>type()</code> e <code>click()</code></p></article>
+        <article><h3>Verificar</h3><p><code>should()</code></p></article>
+      </div>
+      <p class="callout">Nesta aula, cada comando fará parte de uma estratégia de teste.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Objetivos</span>
+      <h2>Ao final, você conseguirá...</h2>
+      <ul>
+        <li>criar cenário feliz e cenários de falha;</li>
+        <li>gerar e-mail único para repetir o cadastro;</li>
+        <li>preparar dados com <code>before</code> e páginas com <code>beforeEach</code>;</li>
+        <li>validar mensagens, quantidade de erros e estado da interface;</li>
+        <li>diagnosticar uma falha usando o Command Log.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Nossa jornada • 2 horas</span>
+      <h2>Como vamos praticar?</h2>
+      <div class="grid">
+        <article><b>01</b><h3>Planejar</h3><p>Conhecer o site e definir seis cenários.</p></article>
+        <article><b>02</b><h3>Aprender</h3><p>Dados únicos, hooks e novas asserções.</p></article>
+        <article><b>03</b><h3>Construir</h3><p>Automatizar o cadastro com o instrutor.</p></article>
+        <article><b>04</b><h3>Resolver</h3><p>Automatizar o login em duplas.</p></article>
+      </div>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Ambiente de treinamento</span>
+      <h2>Conheça o Seu Barriga</h2>
+      <p class="lead">Vamos proteger as duas portas de entrada do sistema: criar uma conta e entrar com ela.</p>
+      <div class="actions">
+        <a href="https://seubarriga.wcaquino.me/cadastro" target="_blank" rel="noopener">Abrir cadastro ↗</a>
+        <a href="https://seubarriga.wcaquino.me/login" target="_blank" rel="noopener">Abrir login ↗</a>
+      </div>
+      <p class="warning">Use somente nomes, e-mails e senhas descartáveis. Nunca use dados pessoais.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Estratégia</span>
+      <h2>Uma pequena matriz, seis provas</h2>
+      <div class="matrix">
+        <div><b>Cadastro</b><span class="happy">Feliz</span><span>Nome vazio</span><span>E-mail vazio</span></div>
+        <div><b>Login</b><span class="happy">Feliz</span><span>Senha incorreta</span><span>Campos vazios</span></div>
+      </div>
+      <p class="callout">Cenário feliz comprova valor. Cenários de falha comprovam proteção.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Antes do código</span>
+      <h2>O que cada teste precisa responder?</h2>
+      <div class="steps">
+        <p><b>1</b>Qual é a pré-condição?</p>
+        <p><b>2</b>Quais dados serão usados?</p>
+        <p><b>3</b>Qual é a ação principal?</p>
+        <p><b>4</b>O que prova o resultado?</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Problema real</span>
+      <h2>Um e-mail fixo funciona quantas vezes?</h2>
+      <div class="versus">
+        <article><strong>Frágil</strong><pre><code>const email = 'aluno@email.com'</code></pre><p>A segunda execução encontra o usuário existente.</p></article>
+        <article><strong>Repetível</strong><pre><code>const email =
+  `aula4.${Date.now()}@email.com`</code></pre><p>Cada execução recebe um identificador novo.</p></article>
+      </div>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Organização</span>
+      <h2><code>before</code> ou <code>beforeEach</code>?</h2>
+      <div class="versus">
+        <article><strong>before()</strong><p>Executa uma vez antes do grupo.</p><code>criar o usuário do login</code></article>
+        <article><strong>beforeEach()</strong><p>Executa antes de cada cenário.</p><code>abrir /cadastro ou /login</code></article>
+      </div>
+      <p class="callout">Dados compartilhados precisam ser controlados. A interface deve começar conhecida.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Novos recursos</span>
+      <h2>Mais ferramentas para verificar</h2>
+      <div class="commands">
+        <p><code>cy.contains()</code><span>localiza pelo papel e texto</span></p>
+        <p><code>.and()</code><span>encadeia outra asserção</span></p>
+        <p><code>.eq()</code><span>seleciona um item da lista</span></p>
+        <p><code>have.length</code><span>verifica uma quantidade</span></p>
+      </div>
+      <pre><code>cy.get('.alert-success')
+  .should('be.visible')
+  .and('contain', 'sucesso')
+
+cy.contains('button', 'Entrar')
+  .should('be.visible')</code></pre>
+    </section>
+
+    <section class="slide section-break">
+      <span class="tag">Parte 1 • Cadastro guiado</span>
+      <h2>Vamos construir juntos.</h2>
+      <p class="lead">Abra <code>01-cadastro-guiado.cy.js</code> e acompanhe a implementação.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Mapeamento da tela</span>
+      <h2>Seletores do cadastro</h2>
+      <pre><code>cy.get('#nome')
+cy.get('#email')
+cy.get('#senha')
+cy.get('input[type="submit"]')</code></pre>
+      <p class="callout">O seletor deve identificar o elemento pelo seu papel, não pela posição visual.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag happy-text">CAD-01 • Cenário feliz</span>
+      <h2>Cria usuário com dados válidos</h2>
+      <pre><code>const email = `cadastro.ok.${Date.now()}@email.com`
+
+cy.get('#nome').type('Aluno Aula 4')
+cy.get('#email').type(email)
+cy.get('#senha').type('Senha123')
+cy.get('input[type="submit"]').click()</code></pre>
+      <p class="lead">Como provar que funcionou?</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Verificação completa</span>
+      <h2>Mensagem + interface resultante</h2>
+      <pre><code>cy.get('.alert-success')
+  .should('be.visible')
+  .and('contain', 'Usuário inserido com sucesso')
+
+cy.contains('button', 'Entrar')
+  .should('be.visible')</code></pre>
+      <p class="callout">A mensagem confirma a resposta; o formulário de login confirma o estado final.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag error-text">CAD-02 e CAD-03 • Falhas</span>
+      <h2>O servidor protege os campos obrigatórios?</h2>
+      <div class="grid">
+        <article><h3>Nome vazio</h3><p>Preencher e-mail e senha.</p><code>Nome é um campo obrigatório</code></article>
+        <article><h3>E-mail vazio</h3><p>Preencher nome e senha.</p><code>Email é um campo obrigatório</code></article>
+      </div>
+      <p class="callout">Cada teste altera uma condição. Assim, a causa da falha fica clara.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Checkpoint</span>
+      <h2>Cadastro concluído?</h2>
+      <div class="questions">
+        <p>Os três títulos descrevem comportamentos?</p>
+        <p>O e-mail pode ser reutilizado sem colisão?</p>
+        <p>Mensagem e interface final foram verificadas?</p>
+        <p>Os testes passam separadamente?</p>
+      </div>
+    </section>
+
+    <section class="slide section-break">
+      <span class="tag">Parte 2 • Desafio em duplas</span>
+      <h2>Agora protejam o login.</h2>
+      <p class="lead">A conta será preparada uma vez. Cada tentativa começará em uma página limpa.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Pré-condição do login</span>
+      <h2>Para entrar, o usuário precisa existir</h2>
+      <pre><code>const usuario = {
+  nome: 'Aluno Aula 4',
+  email: `login.aula4.${Date.now()}@email.com`,
+  senha: 'Senha123',
+}
+
+before(() => {
+  // cadastrar usuario uma vez
+})</code></pre>
+    </section>
+
+    <section class="slide">
+      <span class="tag happy-text">LOG-01 • Cenário feliz</span>
+      <h2>Credenciais válidas abrem o sistema</h2>
+      <pre><code>cy.get('#email').type(usuario.email)
+cy.get('#senha').type(usuario.senha)
+cy.contains('button', 'Entrar').click()</code></pre>
+      <div class="questions"><p>Qual mensagem deve aparecer?</p><p>Qual elemento prova que o usuário está autenticado?</p></div>
+    </section>
+
+    <section class="slide">
+      <span class="tag error-text">LOG-02 • Falha</span>
+      <h2>E-mail existe, mas a senha está errada</h2>
+      <pre><code>cy.get('#email').type(usuario.email)
+cy.get('#senha').type('SenhaIncorreta')
+cy.contains('button', 'Entrar').click()</code></pre>
+      <p class="callout">Esperado: erro de autenticação e permanência no login.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag error-text">LOG-03 • Falha</span>
+      <h2>Dois campos vazios, dois erros</h2>
+      <pre><code>cy.get('.alert-danger').should('have.length', 2)
+
+cy.get('.alert-danger').eq(0)
+  .should('contain', 'Email é um campo obrigatório')
+
+cy.get('.alert-danger').eq(1)
+  .should('contain', 'Senha é um campo obrigatório')</code></pre>
+    </section>
+
+    <section class="slide activity">
+      <span class="tag">Atividade • 30 minutos</span>
+      <h2>Implemente o login</h2>
+      <div class="timer" data-seconds="1800"><span>30:00</span><button type="button">Iniciar</button><button type="button">Reiniciar</button></div>
+      <ol>
+        <li>Abra <code>02-login-desafios.cy.js</code>.</li>
+        <li>Implemente LOG-01, LOG-02 e LOG-03.</li>
+        <li>Remova <code>.skip</code> e execute o arquivo.</li>
+        <li>Provoque uma falha, leia o diagnóstico e restaure o teste.</li>
+      </ol>
+      <div class="actions"><a href="docs/atividade.md" target="_blank">Abrir atividade ↗</a><a href="docs/guia-de-comandos.md" target="_blank">Abrir guia ↗</a></div>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Quando falhar</span>
+      <h2>Leia o diagnóstico antes de editar</h2>
+      <div class="steps">
+        <p><b>1</b>Qual comando ficou vermelho?</p>
+        <p><b>2</b>O elemento foi encontrado?</p>
+        <p><b>3</b>Qual era o valor atual?</p>
+        <p><b>4</b>O problema é produto, teste ou ambiente?</p>
+      </div>
+      <p class="warning">Site indisponível é bloqueio de ambiente — não prova um defeito funcional.</p>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Debrief</span>
+      <h2>Compare as soluções</h2>
+      <div class="questions">
+        <p>Por que o cadastro usa <code>Date.now()</code>?</p>
+        <p>Por que criar o usuário no <code>before</code>?</p>
+        <p>O que o <code>beforeEach</code> protege?</p>
+        <p>Qual cenário de falha foi mais informativo?</p>
+        <p>Mensagem sem verificar a interface seria suficiente?</p>
+        <p>Os testes passam isoladamente?</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Revisão</span>
+      <h2>Quiz final</h2>
+      <p class="lead">Sete perguntas para revisar dados únicos, hooks, asserções e isolamento.</p>
+      <a href="docs/perguntas-kahoot.md" target="_blank">Abrir perguntas e gabarito ↗</a>
+    </section>
+
+    <section class="slide">
+      <span class="tag">Para levar</span>
+      <h2>Um teste confiável controla os dados e prova o resultado.</h2>
+      <div class="grid">
+        <article><h3>Planeje</h3><p>Feliz e falhas relevantes.</p></article>
+        <article><h3>Prepare</h3><p>Estado e massa conhecidos.</p></article>
+        <article><h3>Execute</h3><p>Uma ação principal.</p></article>
+        <article><h3>Comprove</h3><p>Mensagem e estado final.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <button id="prev" type="button" aria-label="Slide anterior">←</button>
+    <span id="counter">01 / 26</span>
+    <button id="next" type="button" aria-label="Próximo slide">→</button>
+  </footer>
+  <script src="apresentacao.js"></script>
+</body>
+</html>
