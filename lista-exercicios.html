@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lista de exercícios da Aula 4 sobre testes de cadastro e login com Cypress.">
+  <title>Exercícios de Cadastro e Login — Aula 4</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #151d35;
+      --ink: #f7f8fc;
+      --muted: #b4bed2;
+      --violet: #a997ff;
+      --green: #72e6a1;
+      --red: #ff9292;
+      --yellow: #ffd166;
+      --border: #324064;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 85% 5%, #332a69 0, transparent 32%),
+        radial-gradient(circle at 8% 92%, #123a55 0, transparent 28%),
+        var(--bg);
+      color: var(--ink);
+      font: 17px/1.6 Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1080px, 92vw);
+      margin: 0 auto;
+      padding: 64px 0 80px;
+    }
+
+    header { max-width: 850px; margin-bottom: 46px; }
+
+    .tag {
+      color: var(--violet);
+      font-size: .85rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: .18em 0;
+      font-size: clamp(2.8rem, 7vw, 5.8rem);
+      line-height: .98;
+      background: linear-gradient(90deg, var(--violet), #63b3ed);
+      color: transparent;
+      background-clip: text;
+    }
+
+    .lead { color: var(--muted); font-size: 1.25rem; }
+
+    .notice {
+      margin-top: 24px;
+      padding: 14px 18px;
+      border: 1px solid #6d5735;
+      border-radius: 12px;
+      background: #2d251c;
+      color: #ffe0a3;
+    }
+
+    h2 { margin: 42px 0 18px; font-size: 1.8rem; }
+
+    .exercise-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      padding: 0;
+      list-style: none;
+      counter-reset: exercises;
+    }
+
+    .exercise {
+      position: relative;
+      padding: 26px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: linear-gradient(145deg, #1a2541, #111a2f);
+      counter-increment: exercises;
+    }
+
+    .exercise::before {
+      content: counter(exercises, decimal-leading-zero);
+      display: inline-grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 50%;
+      background: #2a3560;
+      color: var(--violet);
+      font-weight: 900;
+    }
+
+    .exercise h3 { margin: 16px 0 8px; font-size: 1.3rem; }
+    .exercise p { margin: 8px 0; color: var(--muted); }
+    .exercise strong { color: var(--ink); }
+    .exercise ul { margin: 12px 0 0; padding-left: 22px; }
+    .exercise li { margin: 5px 0; }
+
+    .type {
+      position: absolute;
+      top: 28px;
+      right: 26px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 800;
+    }
+
+    .happy { background: #17392d; color: var(--green); }
+    .failure { background: #3a2130; color: var(--red); }
+
+    code {
+      color: var(--yellow);
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .final-checklist {
+      padding: 24px 28px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    .final-checklist li { margin: 8px 0; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+    a {
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: var(--violet);
+      color: #0c1020;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    a.secondary { border: 1px solid var(--border); background: transparent; color: var(--ink); }
+
+    @media (max-width: 760px) {
+      main { padding-top: 40px; }
+      .exercise-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <span class="tag">Aula 4 • Qualidade de Software</span>
+      <h1>Exercícios de cadastro e login</h1>
+      <p class="lead">Hoje vamos automatizar seis cenários com Cypress: um caminho feliz e duas validações de falha para cada funcionalidade.</p>
+      <p class="notice"><strong>Atenção:</strong> utilize apenas nomes, e-mails e senhas fictícios. Não use dados pessoais ou credenciais reais.</p>
+    </header>
+
+    <section aria-labelledby="cadastro-title">
+      <h2 id="cadastro-title">Parte 1 — Cadastro guiado</h2>
+      <ol class="exercise-list">
+        <li class="exercise">
+          <span class="type happy">Cenário feliz</span>
+          <h3>CAD-01 — Cadastrar um novo usuário</h3>
+          <p><strong>Objetivo:</strong> comprovar que um usuário pode ser criado com dados válidos.</p>
+          <ul>
+            <li>Preencher nome, e-mail único e senha.</li>
+            <li>Enviar o formulário de cadastro.</li>
+            <li>Validar a mensagem <code>Usuário inserido com sucesso</code>.</li>
+            <li>Confirmar que o formulário de login foi exibido.</li>
+          </ul>
+        </li>
+
+        <li class="exercise">
+          <span class="type failure">Cenário de falha</span>
+          <h3>CAD-02 — Tentar cadastrar sem nome</h3>
+          <p><strong>Objetivo:</strong> verificar a proteção do campo obrigatório de nome.</p>
+          <ul>
+            <li>Deixar o nome vazio.</li>
+            <li>Preencher um e-mail único e uma senha.</li>
+            <li>Enviar o formulário.</li>
+            <li>Validar a mensagem <code>Nome é um campo obrigatório</code>.</li>
+          </ul>
+        </li>
+
+        <li class="exercise">
+          <span class="type failure">Cenário de falha</span>
+          <h3>CAD-03 — Tentar cadastrar sem e-mail</h3>
+          <p><strong>Objetivo:</strong> verificar a proteção do campo obrigatório de e-mail.</p>
+          <ul>
+            <li>Preencher o nome e a senha.</li>
+            <li>Deixar o e-mail vazio.</li>
+            <li>Enviar o formulário.</li>
+            <li>Validar a mensagem <code>Email é um campo obrigatório</code>.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="login-title">
+      <h2 id="login-title">Parte 2 — Desafio de login em duplas</h2>
+      <ol class="exercise-list">
+        <li class="exercise">
+          <span class="type happy">Cenário feliz</span>
+          <h3>LOG-01 — Entrar com dados válidos</h3>
+          <p><strong>Objetivo:</strong> comprovar que um usuário existente consegue acessar o sistema.</p>
+          <ul>
+            <li>Usar o e-mail e a senha da conta criada para o teste.</li>
+            <li>Enviar o formulário de login.</li>
+            <li>Validar a mensagem de boas-vindas.</li>
+            <li>Confirmar a exibição do menu <code>Sair</code>.</li>
+          </ul>
+        </li>
+
+        <li class="exercise">
+          <span class="type failure">Cenário de falha</span>
+          <h3>LOG-02 — Entrar com senha incorreta</h3>
+          <p><strong>Objetivo:</strong> verificar se o acesso é negado quando a senha está errada.</p>
+          <ul>
+            <li>Informar o e-mail de um usuário existente.</li>
+            <li>Digitar uma senha incorreta.</li>
+            <li>Enviar o formulário.</li>
+            <li>Validar a mensagem <code>Problemas com o login do usuário</code>.</li>
+          </ul>
+        </li>
+
+        <li class="exercise">
+          <span class="type failure">Cenário de falha</span>
+          <h3>LOG-03 — Entrar com os campos vazios</h3>
+          <p><strong>Objetivo:</strong> comprovar que e-mail e senha são obrigatórios.</p>
+          <ul>
+            <li>Não preencher e-mail nem senha.</li>
+            <li>Enviar o formulário.</li>
+            <li>Confirmar que dois erros foram exibidos.</li>
+            <li>Validar separadamente as mensagens de e-mail e senha obrigatórios.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="checklist-title">
+      <h2 id="checklist-title">Checklist de conclusão</h2>
+      <ul class="final-checklist">
+        <li>Os seis testes possuem títulos que descrevem o comportamento.</li>
+        <li>O e-mail de cadastro é descartável e único, criado com <code>Date.now()</code>.</li>
+        <li>Cada teste começa na página correta e valida a mensagem e o estado final.</li>
+        <li>Não foi usado <code>cy.wait()</code> com tempo fixo.</li>
+        <li>Os testes passam individualmente e também em conjunto.</li>
+      </ul>
+      <nav class="actions" aria-label="Materiais da aula">
+        <a href="docs/atividade.md">Abrir atividade completa</a>
+        <a class="secondary" href="apresentacao.html">Abrir apresentação</a>
+      </nav>
+    </section>
+  </main>
+</body>
+</html>

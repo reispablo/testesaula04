@@ -46,6 +46,7 @@ O arquivo de desafios de login começa com `describe.skip`. Remova o `.skip` dep
 ## Materiais
 
 - `apresentacao.html`: slides da aula.
+- `lista-exercicios.html`: resumo visual dos seis exercícios de cadastro e login.
 - `docs/atividade.md`: enunciado e critérios de aceite.
 - `docs/guia-de-comandos.md`: consulta rápida dos recursos novos.
 - `docs/gabarito-do-instrutor.md`: solução dos desafios de login.
